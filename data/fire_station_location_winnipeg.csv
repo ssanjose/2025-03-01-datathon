@@ -1,4 +1,4 @@
-No,Station Location,Latitude,Longitude
+No,StationLocation,Latitude,Longitude
 1,65 Ellen St.,49.89881764,-97.14639427
 2,55 Watt St.,49.90421091,-97.10483598
 3,337 Des Meurons St.,49.88313723,-97.11154663
@@ -21,7 +21,7 @@ No,Station Location,Latitude,Longitude
 20,525 Banting Drive,49.88022,-97.28808
 21,1446 Regent Ave. W.,49.89487,-97.046808
 22,1567 Waverley St.,49.820316,-97.180296
-23,880 Dalhousie Dr.,42.9423,-81.2882
+23,880 Dalhousie Dr.,49.78224,-97.15571
 24,1665 Rothesay St.,49.95011182,-97.06791499
 25,701 Day St.,49.89869549,-97.00318643
 26,1525 Dakota St.,49.81082072,-97.09285559
@@ -29,3 +29,5 @@ No,Station Location,Latitude,Longitude
 28,524 Osborne St.,49.86589181,-97.13452658
 29,726 Furby St.,49.90032407,-97.15718369
 30,2490 Portage Ave.,49.87502026,-97.25637436
+31,2546 McPhillips St.,49.9599,-97.14204
+32,185 King St.,49.900846,-97.138549

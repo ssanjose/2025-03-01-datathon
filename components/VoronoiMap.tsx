@@ -18,8 +18,8 @@ interface VoronoiMapProps {
 }
 
 const VoronoiMap: React.FC<VoronoiMapProps> = ({
-  width = 975,
-  height = 610,
+  width = 1028,
+  height = 720,
   data,
   winnipegGeoJson
 }) => {
@@ -31,15 +31,16 @@ const VoronoiMap: React.FC<VoronoiMapProps> = ({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    // Create projection centered on Winnipeg
+    // Adjust projection with larger scale
     const projection = d3.geoMercator()
-      .fitSize([width, height], winnipegGeoJson);
+      .center([-97.15, 49.85])
+      .scale(90000) // Increased scale
+      .translate([width / 2, height / 2]);
 
-    // Create path generator
     const path = d3.geoPath().projection(projection);
 
     // Draw Winnipeg map
-    svg.append("g")
+    const mapLayer = svg.append("g")
       .selectAll("path")
       .data(winnipegGeoJson.features)
       .enter()
@@ -49,41 +50,54 @@ const VoronoiMap: React.FC<VoronoiMapProps> = ({
       .attr("stroke", "#999")
       .attr("stroke-width", 0.5);
 
+    // Project points
+    const projectedPoints = data.map(d => ({
+      ...d,
+      x: projection([d.longitude, d.latitude])![0],
+      y: projection([d.longitude, d.latitude])![1]
+    }));
+
     // Create voronoi generator
     const delaunay = d3.Delaunay.from(
-      data,
-      d => projection([d.longitude, d.latitude])![0],
-      d => projection([d.longitude, d.latitude])![1]
+      projectedPoints,
+      d => d.x,
+      d => d.y
     );
-    const voronoi = delaunay.voronoi([0, 0, width, height]);
 
-    // Draw voronoi cells
-    svg.append("g")
+    const bounds = path.bounds(winnipegGeoJson.features[0]);
+    const voronoi = delaunay.voronoi([
+      bounds[0][0] - 1, // Add padding to bounds
+      bounds[0][1] - 1,
+      bounds[1][0] + 1,
+      bounds[1][1] + 1
+    ]);
+
+    // Draw voronoi cells with increased opacity
+    const voronoiLayer = svg.append("g")
       .attr("class", "voronoi")
       .selectAll("path")
-      .data(data)
+      .data(projectedPoints)
       .enter()
       .append("path")
       .attr("d", (_, i) => voronoi.renderCell(i))
       .attr("stroke", "#2563eb")
-      .attr("stroke-width", 1)
-      .attr("fill", "none")
-      .attr("opacity", 0.5);
+      .attr("stroke-width", 1.5) // Increased stroke width
+      .attr("fill", "#2563eb")
+      .attr("fill-opacity", 0.1) // Added fill opacity
+      .attr("stroke-opacity", 0.8); // Increased stroke opacity
 
-    // Draw fire stations
-    svg.append("g")
+    // Draw fire stations on top
+    const stationLayer = svg.append("g")
       .selectAll("circle")
-      .data(data)
+      .data(projectedPoints)
       .enter()
       .append("circle")
-      .attr("transform", d => {
-        const [x, y] = projection([d.longitude, d.latitude])!;
-        return `translate(${x}, ${y})`;
-      })
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y)
       .attr("r", 4)
       .attr("fill", "#dc2626")
       .attr("stroke", "#fff")
-      .attr("stroke-width", 1)
+      .attr("stroke-width", 1.5)
       .append("title")
       .text(d => d.name || `Fire Station at ${d.longitude}, ${d.latitude}`);
 
